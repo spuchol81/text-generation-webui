@@ -14,11 +14,6 @@ RUN . /build/venv/bin/activate && \
     pip3 install torch torchvision torchaudio && \
     pip3 install -r requirements.txt
 
-# https://developer.nvidia.com/cuda-gpus
-# for a rtx 2060: ARG TORCH_CUDA_ARCH_LIST="7.5"
-ARG TORCH_CUDA_ARCH_LIST="3.5;5.0;6.0;6.1;7.0;7.5;8.0;8.6+PTX"
-RUN . /build/venv/bin/activate && \
-    python3 setup_cuda.py bdist_wheel -d .
 
 FROM nvidia/cuda:11.8.0-runtime-ubuntu22.04
 
@@ -33,14 +28,13 @@ RUN --mount=type=cache,target=/root/.cache/pip pip3 install virtualenv
 RUN mkdir /app
 
 WORKDIR /app
-
 ARG WEBUI_VERSION
 RUN test -n "${WEBUI_VERSION}" && git reset --hard ${WEBUI_VERSION} || echo "Using provided webui source"
 
 RUN virtualenv /app/venv
 RUN . /app/venv/bin/activate && \
     pip3 install --upgrade pip setuptools wheel && \
-    pip3 install torch torchvision torchaudio
+    pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
 COPY --from=builder /build /app/repositories/GPTQ-for-LLaMa
 RUN . /app/venv/bin/activate && \
@@ -61,9 +55,8 @@ COPY requirements.txt /app/requirements.txt
 RUN . /app/venv/bin/activate && \
     pip3 install -r requirements.txt
 
-RUN cp /app/venv/lib/python3.10/site-packages/bitsandbytes/libbitsandbytes_cuda118.so /app/venv/lib/python3.10/site-packages/bitsandbytes/libbitsandbytes_cpu.so
 RUN ls -al
-RUN wget -P /app/models https://huggingface.co/ozcur/alpaca-native-4bit/resolve/main/alpaca7b-4bit.pt
+RUN python download-model.py ozcur/alpaca-native-4bit 
 COPY . /app/
 ENV CLI_ARGS="--model alpaca-native-4bit --wbits 4 --groupsize 128"
 CMD . /app/venv/bin/activate && python3 server.py ${CLI_ARGS}
