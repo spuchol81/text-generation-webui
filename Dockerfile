@@ -11,9 +11,12 @@ WORKDIR /build
 RUN python3 -m venv /build/venv
 RUN . /build/venv/bin/activate && \
     pip3 install --upgrade pip setuptools wheel && \
-    pip3 install torch torchvision torchaudio && \
+    pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu && \
     pip3 install -r requirements.txt
 
+ARG TORCH_CUDA_ARCH_LIST="3.5;5.0;6.0;6.1;7.0;7.5;8.0;8.6+PTX"
+RUN . /build/venv/bin/activate && \
+    python3 setup_cuda.py bdist_wheel -d .
 
 FROM nvidia/cuda:11.8.0-runtime-ubuntu22.04
 
