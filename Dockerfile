@@ -62,7 +62,8 @@ RUN . /app/venv/bin/activate && \
     pip3 install -r requirements.txt
 
 RUN cp /app/venv/lib/python3.10/site-packages/bitsandbytes/libbitsandbytes_cuda118.so /app/venv/lib/python3.10/site-packages/bitsandbytes/libbitsandbytes_cpu.so
-
+RUN ls -al
+RUN wget -P /app/models https://huggingface.co/ozcur/alpaca-native-4bit/resolve/main/alpaca7b-4bit.pt
 COPY . /app/
-ENV CLI_ARGS=""
+ENV CLI_ARGS="--model alpaca-native-4bit --wbits 4 --groupsize 128"
 CMD . /app/venv/bin/activate && python3 server.py ${CLI_ARGS}
