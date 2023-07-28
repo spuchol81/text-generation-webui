@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.8.0-devel-ubuntu22.04 as builder
+FROM python:3.10 as builder
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y git vim build-essential python3-dev python3-venv && \
@@ -18,7 +18,7 @@ ARG TORCH_CUDA_ARCH_LIST="3.5;5.0;6.0;6.1;7.0;7.5;8.0;8.6+PTX"
 RUN . /build/venv/bin/activate && \
     python3 setup_cuda.py bdist_wheel -d .
 
-FROM nvidia/cuda:11.8.0-runtime-ubuntu22.04
+FROM python:3.10
 
 LABEL maintainer="Your Name <your.email@example.com>"
 LABEL description="Docker image for GPTQ-for-LLaMa and Text Generation WebUI"
