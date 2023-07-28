@@ -36,10 +36,6 @@ RUN . /app/venv/bin/activate && \
     pip3 install --upgrade pip setuptools wheel && \
     pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
-COPY --from=builder /build /app/repositories/GPTQ-for-LLaMa
-RUN . /app/venv/bin/activate && \
-    pip3 install /app/repositories/GPTQ-for-LLaMa/*.whl
-
 COPY extensions/api/requirements.txt /app/extensions/api/requirements.txt
 COPY extensions/elevenlabs_tts/requirements.txt /app/extensions/elevenlabs_tts/requirements.txt
 COPY extensions/google_translate/requirements.txt /app/extensions/google_translate/requirements.txt
